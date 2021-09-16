@@ -1,8 +1,5 @@
 import React from 'react'
 
-const useIsomorphicLayoutEffect =
-  typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect
-
 import { useState, useCallback } from 'react';
 
 export const useForceUpdate = (): () => void => {
@@ -16,9 +13,11 @@ export const useForceUpdate = (): () => void => {
 }
 
 interface IMainFactoy extends Object {
-  forceToUpdate: (componentName: string) => {};
+  forceToUpdate: (componentName: string) => void;
 }
-export const useForceUpdateComponentName = (mainFactory: IMainFactoy, componentName: string, cleaningCallBack: () => void): void => {
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect
+export const useForceUpdateFromAnywhere = (mainFactory: IMainFactoy, componentName: string, cleaningCallBack?: () => void): void => {
   const [, force2Update] = useState<{}>(Object.create(null));
 
   const forceUpdate = useCallback((): void => {
@@ -29,31 +28,29 @@ export const useForceUpdateComponentName = (mainFactory: IMainFactoy, componentN
 
   useIsomorphicLayoutEffect(() => {
     return () => {
-      cleaningCallBack();
+      cleaningCallBack && cleaningCallBack();
       delete (mainFactory as any).eventsForForceUpdate;
     };
   }, [mainFactory, componentName]);
 }
 
 export const useEvents = (mainFactory: any, componentName: string, forceUpdate: () => void): void => {
-
-  if (typeof mainFactory.eventsForForceUpdate !== 'undefined') {
+  if (typeof mainFactory.eventsForForceUpdate === 'undefined') {
     mainFactory.eventsForForceUpdate = {};
+
+    const trigger = (cp: string): void => {
+      const handlers = mainFactory.eventsForForceUpdate[`on${cp}Change`];
+      console.log(cp, handlers)
+
+      if (handlers && typeof handlers === 'function') {
+        handlers.apply(null, null)
+      }
+    };
 
     mainFactory.forceToUpdate = (cp: string) => trigger(cp);
   }
-  const events = mainFactory.eventsForForceUpdate;
 
-  if (!Object.prototype.hasOwnProperty.call(events, componentName)) {
-    events[`on${componentName}Change`] = forceUpdate;
+  if (!Object.prototype.hasOwnProperty.call(mainFactory.eventsForForceUpdate, componentName)) {
+    mainFactory.eventsForForceUpdate[`on${componentName}Change`] = forceUpdate;
   }
-
-
-  const trigger = (cp: string): void => {
-    const handlers = events[`on${cp}Change`];
-
-    if (handlers && typeof handlers === 'function') {
-      handlers.apply(null, null)
-    }
-  };
 }

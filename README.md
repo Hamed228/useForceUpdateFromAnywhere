@@ -6,15 +6,17 @@
 
 ## About
 
-React hooks for force updating components.
+React hooks for force updating Components from anywhere by others Components.
 Force update from anywhere to those using a useForceUpdate hook with optional payload.
+
+only pass component's name (it must be uniqe name) and one main object that has one function by name "forceName" without any implementation. after that in other Componete you can use mainObject.forceUpdate(componentName) and that Component going to update :)
 
 ## Install
 
 ### npm
 ```bash
 
-npm i force2update
+npm i useForceUpdateFromAnywhere
 
 ```
 
@@ -23,12 +25,12 @@ npm i force2update
 ### Basic
 
 ```jsx
-import { useForceUpdate, useForceUpdateField } from 'force2update'
+import { useForceUpdateFromAnywhere } from 'useForceUpdateFromAnywhere'
 
 function App() {
 
 
-  const forceUpdate = useForceUpdate()
+  useForceUpdate()
 
 
   let onUpdate = () => {

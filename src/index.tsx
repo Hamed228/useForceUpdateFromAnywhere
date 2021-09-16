@@ -40,7 +40,6 @@ export const useEvents = (mainFactory: any, componentName: string, forceUpdate: 
 
     const trigger = (cp: string): void => {
       const handlers = mainFactory.eventsForForceUpdate[`on${cp}Change`];
-      console.log(cp, handlers)
 
       if (handlers && typeof handlers === 'function') {
         handlers.apply(null, null)
